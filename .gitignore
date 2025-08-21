@@ -1,0 +1,33 @@
+# PyInstaller derleme çıktıları
+build/
+dist/
+*.spec
+
+# Sanal ortamlar
+venv/
+*.venv/
+.env/
+.conda/
+envs/
+
+# Python derleme çıktıları
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Veritabanı dosyaları (eğer proje içinde oluşturuluyorsa)
+data/*.db
+*.db
+
+# Log dosyaları
+logs/
+*.log
+
+# İşletim sistemi geçici dosyaları
+.DS_Store
+Thumbs.db
+
+*.exe
+
+*.bat
