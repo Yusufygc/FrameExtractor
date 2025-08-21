@@ -17,9 +17,6 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle("Frame Extractor")
         
-        self.setMinimumSize(850, 720) 
-        self.setGeometry(100, 100, 850, 720)
-
         self.video_path = None
         self.worker = None
 
@@ -148,7 +145,16 @@ class MainWindow(QMainWindow):
         main_layout.addStretch()
 
         self.progress_bar.hide()
+        
         self._connect_signals()
+        # 1. Makul bir minimum boyut belirle (kullanıcının pencereyi tamamen kaybetmesini önler)
+        self.setMinimumSize(850, 650)
+        
+        # 2. İçeriğin ideal yüksekliğini hesapla ve biraz pay ekle
+        ideal_height = main_layout.sizeHint().height() + 30 # 30 piksel estetik pay
+        
+        # 3. Pencereyi bu ideal boyuta yeniden boyutlandır
+        self.resize(850, ideal_height)
     
     def _apply_shadow_effect(self, widget):
         shadow = QGraphicsDropShadowEffect()
@@ -355,7 +361,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Hata", f"Video bilgileri okunurken bir hata oluştu:\n{e}")
             self._reset_video_info()
-            
+
     def start_processing(self):
         if not self.video_path:
             QMessageBox.warning(self, "Uyarı", "Lütfen önce bir video dosyası seçin.")
