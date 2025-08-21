@@ -51,33 +51,31 @@ class RangeSlider(QWidget):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.Antialiasing)
         
-        # Widget'ın çizim alanını ve merkezini al
         rect = self.rect().adjusted(self.handle_radius, 0, -self.handle_radius, 0)
         center_y = rect.center().y()
         
-        # 1. Arka plan çubuğunu (tüm aralık) çiz
-        painter.setPen(QPen(QColor("#4A4A4A"), 3, Qt.SolidLine, Qt.RoundCap))
+        # 1. Arka plan çubuğu (yeni renk)
+        painter.setPen(QPen(QColor(0, 0, 0, 60), 3, Qt.SolidLine, Qt.RoundCap)) # Yarı saydam siyah
         painter.drawLine(rect.left(), center_y, rect.right(), center_y)
         
-        # Düşük ve yüksek değerlerin X koordinatlarını hesapla
         low_pos = self._value_to_pos(self._low, rect)
         high_pos = self._value_to_pos(self._high, rect)
 
-        # 2. Seçili aralığı (mavi çubuk) çiz
-        painter.setPen(QPen(QColor("#0078D7"), 4, Qt.SolidLine, Qt.RoundCap))
+        # 2. Seçili aralık (yeni vurgu rengi)
+        painter.setPen(QPen(QColor("#00D1FF"), 4, Qt.SolidLine, Qt.RoundCap))
         painter.drawLine(int(low_pos), center_y, int(high_pos), center_y)
 
-        # 3. Başlangıç ve bitiş tutamaçlarını çiz
+        # 3. Başlangıç ve bitiş tutamaçları
         self._draw_handle(painter, int(low_pos), center_y)
         self._draw_handle(painter, int(high_pos), center_y)
 
     # YENİ TUTAMAÇ ÇİZİM METODU
     def _draw_handle(self, painter, pos_x, pos_y):
-        # Dış beyaz çerçeve
-        painter.setPen(QPen(QColor("#FFFFFF"), 2))
-        # İç mavi dolgu
-        painter.setBrush(QBrush(QColor("#0078D7")))
-        painter.drawEllipse(QPoint(pos_x, pos_y), self.handle_radius, self.handle_radius)
+        # Dış çerçeve (yeni renk)
+        painter.setPen(QPen(QColor("#E0E0E0"), 2))
+        # İç dolgu (yeni vurgu rengi)
+        painter.setBrush(QBrush(QColor("#00D1FF")))
+        painter.drawEllipse(QPoint(pos_x, pos_y), self.handle_radius - 1, self.handle_radius - 1)
 
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton:

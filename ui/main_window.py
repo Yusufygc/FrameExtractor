@@ -5,9 +5,10 @@ import os
 import cv2
 from PyQt5.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
                              QGroupBox, QPushButton, QLineEdit, QLabel, QRadioButton,
-                             QProgressBar, QFormLayout, QTimeEdit, QFileDialog, QMessageBox)
+                             QProgressBar, QFormLayout, QTimeEdit, QFileDialog, QMessageBox,
+                             QGraphicsDropShadowEffect, QScrollArea)
 from PyQt5.QtCore import Qt, QTime
-from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QFont, QColor
 from threads.worker import ProcessingWorker
 from ui.range_slider import RangeSlider
 
@@ -15,58 +16,122 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Frame Extractor")
-        self.setGeometry(100, 100, 850, 650)
+        
+        self.setMinimumSize(850, 720) 
+        self.setGeometry(100, 100, 850, 720)
 
         self.video_path = None
         self.worker = None
 
         self.setStyleSheet("""
-            QWidget {
-                background-color: #2E2E2E; color: #E0E0E0; font-family: 'Segoe UI'; font-size: 10pt;
+            /* Ana Pencere ve Arka Plan */
+            #MainWindow, QWidget {
+                background-color: qlineargradient(x1:0, y1:0, x2:1, y2:1,
+                                                  stop:0 #1E1B32, stop:1 #342F5C);
+                font-family: 'Segoe UI';
+                font-size: 10pt;
             }
+            /* Grup Kutuları (Glassmorphism Etkisi) */
             QGroupBox {
-                font-weight: bold; border: 1px solid #4A4A4A; border-radius: 8px;
-                margin-top: 1ex; padding: 15px;
+                background-color: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 12px;
+                font-size: 12pt;
+                font-weight: bold;
+                color: #E0E0E0;
+                margin-top: 1ex;
+                padding: 20px 15px 15px 15px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin; subcontrol-position: top left;
-                padding: 0 10px; margin-left: 10px;
+                padding: 0 10px; margin-left: 10px; color: #CCCCCC;
             }
+            /* Butonlar */
             QPushButton {
-                background-color: #3C3C3C; border: 1px solid #5A5A5A;
-                border-radius: 5px; padding: 8px 12px;
+                background-color: rgba(255, 255, 255, 0.08);
+                border: 1px solid rgba(255, 255, 255, 0.15);
+                border-radius: 8px; padding: 8px 12px;
+                color: #E0E0E0; font-size: 10pt;
             }
-            QPushButton:hover { background-color: #4A4A4A; border-color: #6A6A6A; }
-            QPushButton:pressed { background-color: #2A2A2A; }
+            QPushButton:hover { background-color: rgba(255, 255, 255, 0.12); }
+            QPushButton:pressed { background-color: rgba(0, 0, 0, 0.05); }
+            /* Ana İşlem Butonu */
             QPushButton#StartButton {
-                background-color: #0078D7; color: white; font-weight: bold; border: none;
+                background-color: #00D1FF; color: #1E1B32;
+                font-weight: bold; font-size: 12pt; border: none;
             }
-            QPushButton#StartButton:hover { background-color: #005A9E; }
-            QPushButton#StartButton:pressed { background-color: #003C6A; }
+            QPushButton#StartButton:hover { background-color: #50E3FF; }
+            QPushButton#StartButton:pressed { background-color: #00B4CC; }
+            /* Metin Giriş Alanları */
             QLineEdit, QTimeEdit {
-                background-color: #252525; border: 1px solid #4A4A4A;
-                border-radius: 5px; padding: 6px;
+                background-color: rgba(0, 0, 0, 0.2);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px; padding: 6px;
+                color: #E0E0E0; font-size: 10pt;
             }
+            QLineEdit:focus, QTimeEdit:focus { border-color: #00D1FF; }
+            /* İlerleme Çubuğu */
             QProgressBar {
-                border: 1px solid #4A4A4A; border-radius: 5px; text-align: center; color: white;
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px; text-align: center;
+                color: white; background-color: rgba(0, 0, 0, 0.2);
             }
-            QProgressBar::chunk { background-color: #0078D7; border-radius: 4px; margin: 1px; }
-            QLabel { padding-top: 2px; }
+            QProgressBar::chunk {
+                background-color: #00D1FF; border-radius: 6px; margin: 2px;
+            }
+            /* Etiketler ve Radyo Butonlar */
+            QLabel, QRadioButton {
+                background-color: transparent; color: #E0E0E0; font-size: 10pt;
+            }
+            #InfoLabel {
+                color: #AAAAAA; font-size: 9pt; font-style: italic;
+                padding-top: 5px; border: none; background: none;
+            }
+            #VideoInfoLabel {
+                background: rgba(0, 0, 0, 0.15);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 8px; padding: 15px;
+            }
+            /* Kaydırma Çubuğu (Scrollbar) Stili */
+            QScrollArea { border: none; background: transparent; }
+            QScrollBar:vertical {
+                border: none; background-color: rgba(0, 0, 0, 0.15);
+                width: 10px; margin: 0px; border-radius: 5px;
+            }
+            QScrollBar::handle:vertical {
+                background-color: #00D1FF; min-height: 20px; border-radius: 5px;
+            }
+            QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+                border: none; background: none; height: 0;
+            }
+            QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical { background: none; }             
         """)
 
-        central_widget = QWidget()
-        self.setCentralWidget(central_widget)
-        main_layout = QVBoxLayout(central_widget)
-        main_layout.setContentsMargins(15, 15, 15, 15)
-        main_layout.setSpacing(15)
+        scroll_area = QScrollArea()
+        scroll_area.setWidgetResizable(True)
+        scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
+        scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAsNeeded)
+        self.setCentralWidget(scroll_area)
 
-        self.video_selection_group = self._create_video_selection_group() # Hatanın oluştuğu satır buydu
+        scroll_content_widget = QWidget()
+        scroll_area.setWidget(scroll_content_widget)
+        # --- DÜZELTME: scroll_content_widget'e objectName atandı ---
+        scroll_content_widget.setObjectName("MainWindow")
+
+        main_layout = QVBoxLayout(scroll_content_widget)
+        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(20)
+
+        self.video_selection_group = self._create_video_selection_group()
         self.output_dir_group = self._create_output_dir_group()
         self.options_group = self._create_options_group()
         self.info_group = self._create_info_group()
 
+        for group_box in [self.video_selection_group, self.output_dir_group, self.options_group, self.info_group]:
+            self._apply_shadow_effect(group_box)
+
         top_layout = QHBoxLayout()
-        top_layout.setSpacing(15)
+        top_layout.setSpacing(20)
         top_layout.addWidget(self.video_selection_group)
         top_layout.addWidget(self.output_dir_group)
         
@@ -80,66 +145,77 @@ class MainWindow(QMainWindow):
         self.start_button.setFont(QFont('Segoe UI', 12, QFont.Bold))
         main_layout.addWidget(self.start_button)
         
-        self.progress_bar.hide()
-        
-        self._connect_signals()
+        main_layout.addStretch()
 
-    # --- DÜZELTME: Silinmiş olan bu metod geri eklendi ---
+        self.progress_bar.hide()
+        self._connect_signals()
+    
+    def _apply_shadow_effect(self, widget):
+        shadow = QGraphicsDropShadowEffect()
+        shadow.setBlurRadius(25)
+        shadow.setColor(QColor(0, 0, 0, 80))
+        shadow.setOffset(4, 4)
+        widget.setGraphicsEffect(shadow)
+
+    # --- BU METODUN VAR OLDUĞUNDAN EMİN OLUN ---
     def _create_video_selection_group(self):
-        group_box = QGroupBox("1. Video Seçimi")
+        group_box = QGroupBox("1. Video Seçimi 🎥")
         layout = QVBoxLayout()
+        layout.setSpacing(15)
 
         file_path_layout = QHBoxLayout()
         self.video_path_line = QLineEdit()
-        self.video_path_line.setPlaceholderText("Lütfen bir video dosyası seçin...")
+        self.video_path_line.setPlaceholderText("🎥 Lütfen bir video dosyası seçin...")
         self.video_path_line.setReadOnly(True)
         self.select_video_button = QPushButton("...")
         file_path_layout.addWidget(self.video_path_line)
         file_path_layout.addWidget(self.select_video_button)
         layout.addLayout(file_path_layout)
 
-        info_layout = QFormLayout()
-        self.frame_count_label = QLabel("Belirtilmedi")
-        self.video_size_label = QLabel("Belirtilmedi")
-        self.video_duration_label = QLabel("Belirtilmedi")
-        
-        info_layout.addRow("Toplam Frame Sayısı:", self.frame_count_label)
-        info_layout.addRow("Video Boyutu:", self.video_size_label)
-        info_layout.addRow("Video Süresi:", self.video_duration_label)
-        layout.addLayout(info_layout)
+        self.video_info_label = QLabel("📊 Video yüklendikten sonra bilgiler burada görünecek.")
+        self.video_info_label.setObjectName("VideoInfoLabel")
+        self.video_info_label.setWordWrap(True)
+        self.video_info_label.setAlignment(Qt.AlignTop)
+        self.video_info_label.setMinimumHeight(180) # Yüksekliği biraz artırdık
+        layout.addWidget(self.video_info_label)
         
         group_box.setLayout(layout)
         return group_box
 
     def _create_output_dir_group(self):
-        group_box = QGroupBox("2. Çıktı Dizini")
+        group_box = QGroupBox("2. Çıktı Dizini 🗂️ ")
         layout = QVBoxLayout()
         
         file_path_layout = QHBoxLayout()
         self.output_dir_line = QLineEdit()
-        self.output_dir_line.setPlaceholderText("İsteğe bağlı: Çıktı klasörünü seçin...")
+        self.output_dir_line.setPlaceholderText("📂 İsteğe bağlı: Çıktı klasörünü seçin...")
         self.select_output_dir_button = QPushButton("...")
         file_path_layout.addWidget(self.output_dir_line)
         file_path_layout.addWidget(self.select_output_dir_button)
-
         layout.addLayout(file_path_layout)
+
+        info_label = QLabel("📄 Seçim yapılmazsa, klasör masaüstünde video adıyla oluşturulur.")
+        info_label.setObjectName("InfoLabel")
+        info_label.setWordWrap(True)
+        layout.addWidget(info_label)
+
         layout.addStretch()
         group_box.setLayout(layout)
         return group_box
     
-    # --- DÜZELTME: Bu metodun tekrar eden kopyası silindi ---
+    # --- BU METODUN TEK BİR KOPYASI OLDUĞUNDAN EMİN OLUN ---
     def _create_options_group(self):
-        group_box = QGroupBox("3. Ayırma Seçenekleri")
+        group_box = QGroupBox("3. Ayırma Seçenekleri ⚙️")
         main_layout = QVBoxLayout()
         main_layout.setSpacing(10)
 
-        self.radio_all_frames = QRadioButton("Videonun tüm framelerini ayır")
-        self.radio_time_range = QRadioButton("Belirli bir zaman aralığını ayır")
-        self.radio_scene_change = QRadioButton("Sahne değişimlerini algıla ve ayır")
+        self.radio_all_frames = QRadioButton("🎬 Videonun tüm framelerini ayır")
+        self.radio_time_range = QRadioButton("⏰ Belirli bir zaman aralığını ayır")
+        self.radio_scene_change = QRadioButton("🎭 Sahne değişimlerini algıla ve ayır")
 
         self.time_range_widget = QWidget()
         time_range_layout = QHBoxLayout(self.time_range_widget)
-        time_range_layout.setContentsMargins(20, 10, 20, 0) # Sağdan da boşluk eklendi
+        time_range_layout.setContentsMargins(20, 10, 20, 0)
         
         self.start_time_edit = QTimeEdit()
         self.start_time_edit.setDisplayFormat("HH:mm:ss")
@@ -147,12 +223,12 @@ class MainWindow(QMainWindow):
         self.end_time_edit.setDisplayFormat("HH:mm:ss")
         self.range_slider = RangeSlider()
         
-        time_range_layout.addWidget(QLabel("Başlangıç:"))
+        time_range_layout.addWidget(QLabel("⏩Başlangıç:"))
         time_range_layout.addWidget(self.start_time_edit)
         time_range_layout.addStretch(1)
         time_range_layout.addWidget(self.range_slider, 10)
         time_range_layout.addStretch(1)
-        time_range_layout.addWidget(QLabel("Bitiş:"))
+        time_range_layout.addWidget(QLabel("⏹️Bitiş:"))
         time_range_layout.addWidget(self.end_time_edit)
         
         self.time_range_widget.setEnabled(False) 
@@ -209,16 +285,63 @@ class MainWindow(QMainWindow):
             if not cap.isOpened():
                 raise IOError("Video dosyası açılamadı veya bozuk.")
 
-            frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            # Tüm video metriklerini al
+            width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+            height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
             fps = cap.get(cv2.CAP_PROP_FPS)
+            frame_count = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+            
+            # --- KESİN DÜZELTME: FPS Sağlamlık Kontrolü ---
+            # Eğer OpenCV FPS değerini okuyamazsa (0 veya geçersiz bir değer döndürürse),
+            # makul bir varsayılan değer kullan. Bu, sürenin 0 olmasını engeller.
+            if fps is None or fps <= 0 or fps > 1000:
+                fps = 30.0  # Varsayılan değer olarak 30 FPS ata
+            # --- DÜZELTME BİTTİ ---
+                
             duration_seconds = frame_count / fps if fps > 0 else 0
             file_size_bytes = os.path.getsize(self.video_path)
             cap.release()
 
-            self.frame_count_label.setText(f"{frame_count}")
-            self.video_duration_label.setText(self._format_duration(duration_seconds))
-            self.video_size_label.setText(self._format_size(file_size_bytes))
+            # Verileri formatla ve hesapla
+            duration_str = self._format_duration(duration_seconds)
+            file_size_str = self._format_size(file_size_bytes)
+            from math import gcd
+            r = gcd(width, height)
+            aspect_ratio = f"{width//r}:{height//r}"
             
+            # HTML şablonunu oluştur (ikonlar değiştirildi)
+            info_html = f"""
+            <h3 style='color: #E0E0E0; margin: 0 0 12px 0; font-size: 14pt;'>📊 Video Analizi</h3>
+            <table width='100%' style='font-size: 10pt; border-spacing: 0 8px;'>
+                <tr>
+                    <td style='color: #CCCCCC;'>📏 <b>Çözünürlük:</b></td>
+                    <td style='color: #00D1FF; font-weight: bold; text-align: right;'>{width} × {height} px</td>
+                </tr>
+                <tr>
+                    <td style='color: #CCCCCC;'>⏱️ <b>Süre:</b></td>
+                    <td style='color: #50E3C2; font-weight: bold; text-align: right;'>{duration_str}</td>
+                </tr>
+                <tr>
+                    <td style='color: #CCCCCC;'>🎞️ <b>FPS (Kare Hızı):</b></td>
+                    <td style='color: #FFD600; font-weight: bold; text-align: right;'>{fps:.2f}</td>
+                </tr>
+                <tr>
+                    <td style='color: #CCCCCC;'>📦 <b>Toplam Frame:</b></td>
+                    <td style='color: #B298DC; font-weight: bold; text-align: right;'>{frame_count:,}</td>
+                </tr>
+                <tr>
+                    <td style='color: #CCCCCC;'>💾 <b>Dosya Boyutu:</b></td>
+                    <td style='color: #CCCCCC; font-weight: bold; text-align: right;'>{file_size_str}</td>
+                </tr>
+                <tr>
+                    <td style='color: #CCCCCC;'>📐 <b>En-Boy Oranı:</b></td>
+                    <td style='color: #9E9E9E; font-weight: bold; text-align: right;'>{aspect_ratio}</td>
+                </tr>
+            </table>
+            """
+            self.video_info_label.setText(info_html)
+
+            # Range slider ve zaman editörlerini ayarla
             self.range_slider.setRange(0, int(duration_seconds))
             self.range_slider.setLow(0)
             self.range_slider.setHigh(int(duration_seconds))
@@ -232,7 +355,7 @@ class MainWindow(QMainWindow):
         except Exception as e:
             QMessageBox.critical(self, "Hata", f"Video bilgileri okunurken bir hata oluştu:\n{e}")
             self._reset_video_info()
-
+            
     def start_processing(self):
         if not self.video_path:
             QMessageBox.warning(self, "Uyarı", "Lütfen önce bir video dosyası seçin.")
@@ -273,9 +396,7 @@ class MainWindow(QMainWindow):
     def _reset_video_info(self):
         self.video_path = None
         self.video_path_line.clear()
-        self.frame_count_label.setText("Belirtilmedi")
-        self.video_duration_label.setText("Belirtilmedi")
-        self.video_size_label.setText("Belirtilmedi")
+        self.video_info_label.setText("📊 Video yüklendikten sonra bilgiler burada görünecek.")
 
     def _format_duration(self, seconds):
         if seconds < 0: return "00:00:00"
