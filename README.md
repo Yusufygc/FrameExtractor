@@ -15,9 +15,7 @@ A modern, responsive, and sleek desktop application designed to simplify the pro
 
 Uygulamanın glassmorphism'den ilham alan modern ve kullanıcı dostu arayüzü:
 
-*(İPUCU: Aşağıdaki satırdaki `link/to/your/screenshot.png` kısmını, projenizin bir ekran görüntüsünü depoya yükleyip onun linkiyle değiştirin.)*
-
-![Frame Extractor Arayüzü](link/to/your/screenshot.png)
+![Frame Extractor Arayüzü](https://github.com/Yusufygc/FrameExtractor/blob/main/resources/ss.png)
 
 ## ✨ Temel Özellikler
 
