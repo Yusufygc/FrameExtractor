@@ -55,7 +55,11 @@
 ## 📸 Ekran Görüntüleri
 
 ```
-![Frame Extractor Arayüzü](https://github.com/Yusufygc/FrameExtractor/blob/main/resources/image.png)
+<p align="center">
+  <img src="https://raw.githubusercontent.com/Yusufygc/FrameExtractor/main/resources/image.png" width="700">
+</p>
+<p align="center"><b>Frame Extractor – Modern QML Arayüz</b></p>
+
 ```
 
 ---
