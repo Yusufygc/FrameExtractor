@@ -10,11 +10,12 @@ venv/
 .conda/
 envs/
 
-# Python derleme çıktıları
+# Python cache
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
+
 
 # Veritabanı dosyaları (eğer proje içinde oluşturuluyorsa)
 data/*.db

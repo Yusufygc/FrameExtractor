@@ -1,0 +1,9 @@
+module components
+
+GlassCard 1.0 GlassCard.qml
+PrimaryButton 1.0 PrimaryButton.qml
+SecondaryButton 1.0 SecondaryButton.qml
+StyledTextField 1.0 StyledTextField.qml
+StyledRadioButton 1.0 StyledRadioButton.qml
+ProgressBar 1.0 ProgressBar.qml
+RangeSlider 1.0 RangeSlider.qml

@@ -1,3 +1,11 @@
-pyqt5
-opencv-python
-numpy
+# Frame Extractor Dependencies
+# Compatible with Python 3.10+
+
+# GUI Framework - PySide6 with QML support
+PySide6>=6.5.0
+
+# Video Processing
+opencv-python>=4.5.0
+
+# Numerical Operations
+numpy>=1.20.0
